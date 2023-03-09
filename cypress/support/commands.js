@@ -24,13 +24,35 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-import locators from '../support/locators'
+import locators from './locators'
 
-Cypress.Commands.add('login', (userLogin, userPassw) => {
-    // realizes the login and check if everything went well using a toast
+Cypress.Commands.add('login', function (userLogin, userPassw)  {
 
+     // visit the login web page
+     cy.visit(Cypress.env('page_login'))
+
+    // realize the login and check if everything went well using a toast
+    
     cy.get(locators.LOGIN.USER).type(userLogin)
     cy.get(locators.LOGIN.PASSWORD).type(userPassw)
     cy.get(locators.LOGIN.BTN_LOGIN).click()
-    cy.get(locators.TOAST_MESSAGE).should('contain', 'Bem vindo')
+    cy.fixture('toast_success_messages').as('toast').then(() => {
+        cy.get(locators.TOAST_MESSAGE).should('contain', this.toast.login)
+    })
+})
+
+Cypress.Commands.add('resetApp', function ()  {
+    cy.get(locators.MENU.SETTINGS).click()
+    cy.get(locators.MENU.RESET_OPTION).click()
+    cy.fixture('toast_success_messages').as('toast').then(() => {
+        cy.get(locators.TOAST_MESSAGE).should('contain', this.toast.app_reseted)
+    })
+})
+
+Cypress.Commands.add('logout', function () {
+    cy.get(locators.MENU.SETTINGS).click()
+    cy.get(locators.MENU.LOGOUT_OPTION).click()
+    cy.fixture('toast_success_messages').as('toast').then(() => {
+        cy.get(locators.TOAST_MESSAGE).should('contain', this.toast.logout)
+    })
 })

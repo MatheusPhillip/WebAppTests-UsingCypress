@@ -1,0 +1,8 @@
+{
+    "login": "Bem vindo",
+    "logout": "Até Logo",
+    "account_created": "Conta inserida com sucesso",
+    "account_deleted": "Conta excluída com sucesso",
+    "account_updated": "Conta atualizada com sucesso",
+    "app_reseted": "Dados resetados com sucesso"
+}
