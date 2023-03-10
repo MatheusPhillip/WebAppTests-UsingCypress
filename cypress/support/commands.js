@@ -56,3 +56,4 @@ Cypress.Commands.add('logout', function () {
         cy.get(locators.TOAST_MESSAGE).should('contain', this.toast.logout)
     })
 })
+
