@@ -44,7 +44,7 @@ const locators = {
         FN_XP_DELETE_TRANSACTION: desc => `//span[contains(., '${desc}')]/../../..//i[@class='far fa-trash-alt']`
     },
     BALANCE: {
-        FN_XP_ACCOUNT_BALANCE: (account_name) => `//td[contains(., '${account_name}')]/../td[contains(., '123,00')]`
+        FN_XP_ACCOUNT_BALANCE: (account_name, account_balance) => `//td[contains(., '${account_name}')]/../td[contains(., '${account_balance}')]`
         //XP_ACCOUNT_BALANCE: `//td[contains(., 'test account')]/../td[contains(., '123,00')]`
     },
     TOAST_MESSAGE: '.toast-message'
