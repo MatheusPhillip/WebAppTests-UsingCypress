@@ -11,6 +11,7 @@ Cypress.Commands.add("getToken", (user, password) => {
     .its("body.token")
     .should("not.be.empty")
     .then((token) => {
+      Cypress.env("token", token);
       return token;
     });
 });
@@ -47,7 +48,7 @@ Cypress.Commands.add("getAccountByName", function (account_name) {
     });
 });
 
-Cypress.Commands.add("getTransactionByDescription", function () {
+Cypress.Commands.add("getTransactionByDescription", function (description) {
   cy.fixture("user")
     .as("user")
     .then(() => {
@@ -56,10 +57,22 @@ Cypress.Commands.add("getTransactionByDescription", function () {
           method: "GET",
           url: "/transacoes",
           headers: { Authorization: `JWT ${token}` },
-          qs: { descricao: "Movimentacao 1, calculo saldo" },
-        }).then(res => {
-            return res
-        })
+          qs: { descricao: description },
+        }).then((res) => {
+          return res;
+        });
       });
     });
+});
+
+Cypress.Commands.overwrite("request", (originalFn, ...options) => {
+  if (options.length === 1) {
+    if (Cypress.env("token")) {
+      options[0].headers = {
+        Authorization: `JWT ${Cypress.env("token")}`,
+      };
+    }
+  }
+
+  return originalFn(...options);
 });

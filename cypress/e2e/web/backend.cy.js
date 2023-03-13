@@ -7,15 +7,16 @@ const dayjs = require("dayjs");
 
 describe("Should test at functional level", () => {
   // The variable token will be the token used on every test
-  let token;
+  //let token;
 
   before(function () {
     cy.fixture("user")
       .as("user")
       .then(() => {
-        cy.getToken(this.user.login, this.user.password).then((tkn) => {
-          token = tkn;
-        });
+        cy.getToken(this.user.login, this.user.password)
+		  //.then((tkn) => {
+          //token = tkn;
+          //});
       });
   });
 
@@ -31,9 +32,7 @@ describe("Should test at functional level", () => {
     cy.request({
       url: "/contas",
       method: "POST",
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
+      //headers: { Authorization: `JWT ${token}`,},
       body: {
         nome: "Conta via rest",
       },
@@ -51,7 +50,7 @@ describe("Should test at functional level", () => {
       cy.request({
         method: "PUT",
         url: `/contas/${accountId}`,
-        headers: { Authorization: `JWT ${token}` },
+        //headers: { Authorization: `JWT ${token}` },
         body: {
           nome: "Account updated using rest",
         },
@@ -67,7 +66,7 @@ describe("Should test at functional level", () => {
     cy.request({
       method: "POST",
       url: "/contas",
-      headers: { Authorization: `JWT ${token}` },
+      //headers: { Authorization: `JWT ${token}` },
       body: {
         nome: "Conta mesmo nome",
       },
@@ -85,7 +84,7 @@ describe("Should test at functional level", () => {
       cy.request({
         method: "POST",
         url: "/transacoes",
-        headers: { Authorization: `JWT ${token}` },
+        //headers: { Authorization: `JWT ${token}` },
         body: {
           conta_id: accountId,
           data_pagamento: dayjs().format("DD/MM/YYYY"),
@@ -108,7 +107,7 @@ describe("Should test at functional level", () => {
         cy.request({
           url: `/transacoes/${res.body[0].id}`,
           method: "PUT",
-          headers: { Authorization: `JWT ${token}` },
+          //headers: { Authorization: `JWT ${token}` },
           body: {
             status: true,
             data_transacao: dayjs(res.body[0].data_transacao).format(
@@ -130,7 +129,7 @@ describe("Should test at functional level", () => {
     cy.request({
       method: "GET",
       url: "/saldo",
-      headers: { Authorization: `JWT ${token}` },
+      //headers: { Authorization: `JWT ${token}` },
     }).then((res) => {
       let accountBalance = null;
       res.body.forEach((account) => {
@@ -147,7 +146,7 @@ describe("Should test at functional level", () => {
       cy.request({
         method: "DELETE",
         url: `/transacoes/${res.body[0].id}`,
-        headers: { Authorization: `JWT ${token}` },
+        //headers: { Authorization: `JWT ${token}` },
       })
         .its("status")
         .should("be.equal", 204);
