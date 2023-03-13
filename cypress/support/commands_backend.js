@@ -46,3 +46,20 @@ Cypress.Commands.add("getAccountByName", function (account_name) {
       });
     });
 });
+
+Cypress.Commands.add("getTransactionByDescription", function () {
+  cy.fixture("user")
+    .as("user")
+    .then(() => {
+      cy.getToken(this.user.login, this.user.password).then((token) => {
+        cy.request({
+          method: "GET",
+          url: "/transacoes",
+          headers: { Authorization: `JWT ${token}` },
+          qs: { descricao: "Movimentacao 1, calculo saldo" },
+        }).then(res => {
+            return res
+        })
+      });
+    });
+});

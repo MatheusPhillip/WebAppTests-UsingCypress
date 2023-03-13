@@ -102,31 +102,31 @@ describe("Should test at functional level", () => {
     cy.get("@response").its("body.id").should("exist");
   });
 
-  it.only("Should get balance", function () {
-    cy.request({
-      method: "GET",
-      url: "/transacoes",
-      headers: { Authorization: `JWT ${token}` },
-      qs: { descricao: "Movimentacao 1, calculo saldo" },
-    }).then((res) => {
-		console.log(res)
-      cy.request({
-        url: `/transacoes/${res.body[0].id}`,
-        method: "PUT",
-        headers: { Authorization: `JWT ${token}` },
-        body: {
-          status: true,
-		  data_transacao: dayjs(res.body[0].data_transacao).format('DD/MM/YYYY'),
-		  data_pagamento: dayjs(res.body[0].data_transacao).format('DD/MM/YYYY'),
-		  descricao: res.body[0].descricao,
-		  envolvido: res.body[0].envolvido,
-		  valor: res.body[0].valor,
-		  conta_id: res.body[0].conta_id
-        },
-      });
-      // .its("status")
-      // .should("be.equal", 200);
-    });
+  it("Should get balance", function () {
+    cy.getTransactionByDescription("Movimentacao 1, calculo saldo").then(
+      (res) => {
+        cy.request({
+          url: `/transacoes/${res.body[0].id}`,
+          method: "PUT",
+          headers: { Authorization: `JWT ${token}` },
+          body: {
+            status: true,
+            data_transacao: dayjs(res.body[0].data_transacao).format(
+              "DD/MM/YYYY"
+            ),
+            data_pagamento: dayjs(res.body[0].data_transacao).format(
+              "DD/MM/YYYY"
+            ),
+            descricao: res.body[0].descricao,
+            envolvido: res.body[0].envolvido,
+            valor: res.body[0].valor,
+            conta_id: res.body[0].conta_id,
+          },
+        })
+          .its("status")
+          .should("be.equal", 200);
+      }
+    );
     cy.request({
       method: "GET",
       url: "/saldo",
@@ -142,5 +142,15 @@ describe("Should test at functional level", () => {
     });
   });
 
-  it("Should delete a transaction", function () {});
+  it("Should delete a transaction", function () {
+    cy.getTransactionByDescription("Movimentacao para exclusao").then((res) => {
+      cy.request({
+        method: "DELETE",
+        url: `/transacoes/${res.body[0].id}`,
+        headers: { Authorization: `JWT ${token}` },
+      })
+        .its("status")
+        .should("be.equal", 204);
+    });
+  });
 });
