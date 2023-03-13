@@ -47,7 +47,7 @@ describe("Should test at functional level", () =>{
 
     })
 
-    it.only('Should update an account', function ()  {
+    it('Should update an account', function ()  {
         cy.request({
             method: 'GET',
             url: '/contas',
@@ -58,8 +58,8 @@ describe("Should test at functional level", () =>{
         }).then(res => {
 
             cy.request({
-                url: `https://barrigarest.wcaquino.me/contas/${res.body[0].id}`,
                 method: 'PUT',
+                url: `/contas/${res.body[0].id}`,
                 headers: {Authorization: `JWT ${token}`},
                 body: {
                     nome: 'Account updated using rest'
@@ -74,8 +74,23 @@ describe("Should test at functional level", () =>{
         
     })
 
-    it('Should not create two accounts with the same name', function() {
-        
+    it.only('Should not create two accounts with the same name', function() {
+        cy.request({
+            method: 'POST',
+            url: '/contas',
+            headers: {Authorization: `JWT ${token}`},
+            body: {
+                nome: 'Conta mesmo nome'
+            },
+            failOnStatusCode: false
+        }).as('response')
+
+        cy.get('@response').then(res => {
+            console.log(res)
+            expect(res.status).to.be.equal(400)
+            expect(res.body.error).to.be.equal('Já existe uma conta com esse nome!')
+            
+        })
     })
 
     it('Should create a transaction', function() {
