@@ -19,14 +19,16 @@ describe("Should test at functional level", () =>{
     })
 
     beforeEach(function () {
-
+        cy.fixture('user').as('user').then(() =>{
+            cy.appResetRest(this.user.login, this.user.password)
+        })
     })
 
     it('Should create a bank account', function () {
         
         
         cy.request({
-            url: 'https://barrigarest.wcaquino.me/contas',
+            url: '/contas',
             method: 'POST',
             headers: {
                 Authorization: `JWT ${token}`
