@@ -47,8 +47,27 @@ describe("Should test at functional level", () =>{
 
     })
 
-    it('Should update an account', function ()  {
-        
+    it.only('Should update an account', function ()  {
+        cy.request({
+            method: 'GET',
+            url: '/contas',
+            headers: {Authorization: `JWT ${token}`},
+            qs: {
+                nome: 'Conta para alterar'
+            }
+        }).then(res => {
+
+            cy.request({
+                url: `https://barrigarest.wcaquino.me/contas/${res.body[0].id}`,
+                method: 'PUT',
+                headers: {Authorization: `JWT ${token}`},
+                body: {
+                    nome: 'Account updated using rest'
+                }
+            }).as('response')
+        })
+
+        cy.get('@response').its('status').should('be.equal', 200)
     })
 
     it('Should delete an account', function () {
