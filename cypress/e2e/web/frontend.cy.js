@@ -216,4 +216,137 @@ describe("Should test using mocks", () => {
       locators.EXTRACT.FN_XP_DELETE_TRANSACTION("Desc")
     ).click();
   });
+
+  it("Should validate data sent to create a bank account", function () {
+
+    cy.intercept('POST', '/contas', (req) => {
+      req.reply({
+        body:[
+          {id: 3, nome: Cypress.env("account_name"), visivel: true, usuario_id: 1}
+        ]
+      })
+      console.log(req)
+      expect(req.body.nome).to.be.empty;
+      expect(req.headers).to.have.property('authorization');
+      expect(req.headers).to.have.property
+    }).as('saveAccount')
+
+    cy.accessAccountMenu();
+    
+    cy.intercept('GET', '/contas', {
+      body:[
+        {id: 1, nome:"Wallet", visivel: true, usuario_id: 1},
+        {id: 2, nome:"Bank", visivel: true, usuario_id: 1},
+        {id: 3, nome: Cypress.env("account_name"), visivel: true, usuario_id: 1},
+      ]
+    }).as('savedAccounts')
+
+    cy.addAccount('{CONTROL}');
+
+    // Validate request
+    //1
+    //cy.wait('@saveAccount').its('request.body.nome').should('not.be.empty')
+    //2
+    //req.reply
+    /*
+      cy.intercept('POST', '/contas', (req) => {
+      req.reply({
+        body:[
+          {id: 3, nome: Cypress.env("account_name"), visivel: true, usuario_id: 1}
+        ]
+      })
+      console.log(req)
+      expect(req.body.nome).to.be.empty;
+      expect(req.headers).to.have.property('authorization');
+      expect(req.headers).to.have.property
+    }).as('saveAccount')
+    */
+    cy.fixture("toast_success_messages")
+      .as("toast")
+      .then(() => {
+        cy.get(locators.TOAST_MESSAGE).should(
+          "contain",
+          this.toast.account_created
+        );
+      });
+  });
+
+  it.only('Should test colors', function () {
+
+    cy.intercept('GET', '/extrato/**', {
+      body:[
+        {
+            "conta": "Conta com movimentacao",
+            "id": 1666129,
+            "descricao": "Receita paga",
+            "envolvido": "BBB",
+            "observacao": null,
+            "tipo": "REC",
+            "data_transacao": "2023-06-13T03:00:00.000Z",
+            "data_pagamento": "2023-06-13T03:00:00.000Z",
+            "valor": "-1500.00",
+            "status": true,
+            "conta_id": 1778502,
+            "usuario_id": 36921,
+            "transferencia_id": null,
+            "parcelamento_id": null
+        },
+        {
+            "conta": "Conta para saldo",
+            "id": 1666130,
+            "descricao": "Receita pendente",
+            "envolvido": "CCC",
+            "observacao": null,
+            "tipo": "REC",
+            "data_transacao": "2023-06-13T03:00:00.000Z",
+            "data_pagamento": "2023-06-13T03:00:00.000Z",
+            "valor": "3500.00",
+            "status": false,
+            "conta_id": 1778503,
+            "usuario_id": 36921,
+            "transferencia_id": null,
+            "parcelamento_id": null
+        },
+        {
+            "conta": "Conta para saldo",
+            "id": 1666131,
+            "descricao": "Despesa paga",
+            "envolvido": "DDD",
+            "observacao": null,
+            "tipo": "DESP",
+            "data_transacao": "2023-06-13T03:00:00.000Z",
+            "data_pagamento": "2023-06-13T03:00:00.000Z",
+            "valor": "-1000.00",
+            "status": true,
+            "conta_id": 1778503,
+            "usuario_id": 36921,
+            "transferencia_id": null,
+            "parcelamento_id": null
+        },
+        {
+            "conta": "Conta para saldo",
+            "id": 1666132,
+            "descricao": "Despesa pendente",
+            "envolvido": "EEE",
+            "observacao": null,
+            "tipo": "DESP",
+            "data_transacao": "2023-06-13T03:00:00.000Z",
+            "data_pagamento": "2023-06-13T03:00:00.000Z",
+            "valor": "1534.00",
+            "status": false,
+            "conta_id": 1778503,
+            "usuario_id": 36921,
+            "transferencia_id": null,
+            "parcelamento_id": null
+        }
+    ]
+    }).as('accountsForTransaction')
+
+    cy.get(locators.MENU.EXTRACT).click()
+    cy.xpath(locators.EXTRACT.FN_XP_GET_LINE('Receita paga')).should('have.class', 'receitaPaga');
+    cy.xpath(locators.EXTRACT.FN_XP_GET_LINE('Receita pendente')).should('have.class', 'receitaPendente');
+    cy.xpath(locators.EXTRACT.FN_XP_GET_LINE('Despesa paga')).should('have.class', 'despesaPaga');
+    cy.xpath(locators.EXTRACT.FN_XP_GET_LINE('Despesa pendente')).should('have.class', 'despesaPendente');
+  })
+
 });

@@ -41,7 +41,8 @@ const locators = {
     EXTRACT: {
         LINES: '.list-group > li',
         FN_XP_SEARCH_TRANSACTION: (desc, value) => `//span[contains(., '${desc}')]/following-sibling::small[contains(., '${value}')]`,
-        FN_XP_DELETE_TRANSACTION: desc => `//span[contains(., '${desc}')]/../../..//i[@class='far fa-trash-alt']`
+        FN_XP_DELETE_TRANSACTION: desc => `//span[contains(., '${desc}')]/../../..//i[@class='far fa-trash-alt']`,
+        FN_XP_GET_LINE: desc => `//span[contains(., '${desc}')]/../../../..`
     },
     BALANCE: {
         FN_XP_ACCOUNT_BALANCE: (account_name, account_balance) => `//td[contains(., '${account_name}')]/../td[contains(., '${account_balance}')]`
