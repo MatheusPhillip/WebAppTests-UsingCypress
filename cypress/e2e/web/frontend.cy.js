@@ -2,6 +2,7 @@
 
 import locators from "../../support/locators";
 import "../../support/accountCommands";
+import buildEnv from "../../support/buildEnv";
 
 // https://barrigareact.wcaquino.me/
 
@@ -12,24 +13,14 @@ describe("Should test at functional level", () => {
     cy.clearAllLocalStorage()
   })
 
-  before(function () {
-    //cy.intercept()
-    cy.intercept('POST', '/signin', {
-      body: {
-        id: 1000,
-        nome:'Fake user',
-        token:"An enormous string that shouldn't be accepted, but it will"
-      }
-    }).as('signin')
-
+  
+  beforeEach(function () {
+    buildEnv()
     cy.fixture("user")
       .as("user")
       .then(() => {
         cy.login(this.user.login, this.user.password);
       });
-  });
-
-  beforeEach(function () {
     // env variables can be found at the cypress.config.js file
 
     // command created at the commands.js file
@@ -48,12 +39,7 @@ describe("Should test at functional level", () => {
 
   it("Should create a bank account", function () {
 
-    cy.intercept('GET', '/contas', {
-      body:[
-        {id: 1, nome:"Wallet", visivel: true, usuario_id: 1},
-        {id: 2, nome:"Bank", visivel: true, usuario_id: 2}
-      ]
-    }).as('accounts')
+    
 
     cy.intercept('POST', '/contas', {
       body:
@@ -82,13 +68,8 @@ describe("Should test at functional level", () => {
       });
   });
 
-  it.only("Should update an account", function () {
-    cy.intercept('GET', '/contas', {
-      body:[
-        {id: 1, nome:"Wallet", visivel: true, usuario_id: 1},
-        {id: 2, nome:"Bank", visivel: true, usuario_id: 2}
-      ]
-    }).as('accounts')
+  it("Should update an account", function () {
+    
 
     cy.intercept('PUT', '/contas/**', {
       body:[
@@ -130,21 +111,17 @@ describe("Should test at functional level", () => {
   });
 
   it("Should not create two accounts with the same name", function () {
+    
+    cy.intercept('POST', '/contas', {
+      statusCode: 400,
+      body:
+        {"error": "Já existe uma conta com esse nome!"}
+    }).as('saveAccountDuplicated')
+    
     cy.accessAccountMenu();
 
     // CREATES AN ACCOUNT WITH THE NAME 'duplicated account name'
-    cy.addAccount(Cypress.env("account_duplicated_name"));
-    cy.get(locators.ACCOUNTS.BTN_SAVE);
-    cy.fixture("toast_success_messages")
-      .as("toast")
-      .then(() => {
-        cy.get(locators.TOAST_MESSAGE).should(
-          "contain",
-          this.toast.account_created
-        );
-      });
-
-    // CREATES A SECOND ACCOUNT USING THE SAME NAME 'duplicated account name'
+    
     cy.addAccount(Cypress.env("account_duplicated_name"));
     cy.get(locators.ACCOUNTS.BTN_SAVE);
     cy.fixture("toast_error_messages")
@@ -157,16 +134,36 @@ describe("Should test at functional level", () => {
       });
   });
 
-  it("Should create a transaction", function () {
+  it.only("Should create a transaction", function () {
+    cy.intercept('POST', '/transacoes', {
+      body:
+        {
+          "id": 1668575,
+          "descricao": "asdas",
+          "envolvido": "asdasd",
+          "observacao": null,
+          "tipo": "REC",
+          "data_transacao": "2023-06-14T03:00:00.000Z",
+          "data_pagamento": "2023-06-14T03:00:00.000Z",
+          "valor": "213.00",
+          "status": false,
+          "conta_id": 1778500,
+          "usuario_id": 36921,
+          "transferencia_id": null,
+          "parcelamento_id": null
+      }
+    }).as('createTransaction')
+
+    
+
     cy.get(locators.MENU.TRANSACTION).click();
 
     // CREATING A TRANSACTION
     cy.get(locators.ACCOUNT_TRANSACTION.DESCRIPTION).type("Desc");
     cy.get(locators.ACCOUNT_TRANSACTION.VALUE).type("123");
     cy.get(locators.ACCOUNT_TRANSACTION.INTERESTED).type("Bank name");
-    cy.get(locators.ACCOUNT_TRANSACTION.ACCOUNT).select(
-      Cypress.env("account_name_to_make_transaction")
-    );
+    cy.get(locators.ACCOUNT_TRANSACTION.ACCOUNT).select("Bank");
+    
     cy.get(locators.ACCOUNT_TRANSACTION.STATUS).click();
 
     // CONFIRMING THE TRANSACTION
@@ -182,6 +179,10 @@ describe("Should test at functional level", () => {
         );
       });
 
+      cy.intercept('GET', '/extrato/**', {
+        fixture: 'savedTransaction.json'
+      }).as('accountsForTransaction')
+
     // VERIFYING IF THE NEW TRANSACTION WAS RECORDED
     cy.get(locators.EXTRACT.LINES).should("have.length", 7);
     cy.xpath(
@@ -190,19 +191,7 @@ describe("Should test at functional level", () => {
   });
 
   it("Should get balance", function () {
-    cy.intercept('GET', '/saldo', {
-      body: [{
-        conta_id: 999,
-        conta:"Wallet",
-        saldo:"100.00"
-      },
-      {
-        conta_id: 99909,
-        conta:"Bank",
-        saldo:"10000000.00"
-      }]
-
-    }).as('balance')
+    
 
     cy.get(locators.MENU.HOME).click();
     cy.xpath(
