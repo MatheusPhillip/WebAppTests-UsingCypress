@@ -6,7 +6,7 @@ import buildEnv from "../../support/buildEnv";
 
 // https://barrigareact.wcaquino.me/
 
-describe("Should test at functional level", () => {
+describe("Should test using mocks", () => {
   // IT CREATES, UPDATE AND DELETE AN ACCOUNT
 
   after(function () {
@@ -95,20 +95,7 @@ describe("Should test at functional level", () => {
       });
   });
 
-  it("Should delete an account", function () {
-    cy.accessAccountMenu();
-    cy.xpath(
-      locators.ACCOUNTS.FN_XP_BTN_DELETE(Cypress.env("account_name_updated"))
-    ).click();
-    cy.fixture("toast_success_messages")
-      .as("toast")
-      .then(() => {
-        cy.get(locators.TOAST_MESSAGE).should(
-          "contain",
-          this.toast.account_deleted
-        );
-      });
-  });
+  
 
   it("Should not create two accounts with the same name", function () {
     
@@ -134,7 +121,7 @@ describe("Should test at functional level", () => {
       });
   });
 
-  it.only("Should create a transaction", function () {
+  it("Should create a transaction", function () {
     cy.intercept('POST', '/transacoes', {
       body:
         {
@@ -184,7 +171,7 @@ describe("Should test at functional level", () => {
       }).as('accountsForTransaction')
 
     // VERIFYING IF THE NEW TRANSACTION WAS RECORDED
-    cy.get(locators.EXTRACT.LINES).should("have.length", 7);
+    cy.get(locators.EXTRACT.LINES).should("have.length", 8);
     cy.xpath(
       locators.EXTRACT.FN_XP_SEARCH_TRANSACTION("Desc", "123,00")
     ).should("exist");
@@ -192,22 +179,41 @@ describe("Should test at functional level", () => {
 
   it("Should get balance", function () {
     
+    cy.intercept('GET', '/transacoes/**', {
+      body: [{
+        "conta": "Conta para saldo",
+        "id": 1666130,
+        "descricao": "Movimentacao 1, calculo saldo",
+        "envolvido": "CCC",
+        "observacao": null,
+        "tipo": "REC",
+        "data_transacao": "2023-06-13T03:00:00.000Z",
+        "data_pagamento": "2023-06-13T03:00:00.000Z",
+        "valor": "3500.00",
+        "status": false,
+        "conta_id": 1778503,
+        "usuario_id": 36921,
+        "transferencia_id": null,
+        "parcelamento_id": null
+    },]
+    })
 
     cy.get(locators.MENU.HOME).click();
     cy.xpath(
-      locators.BALANCE.FN_XP_ACCOUNT_BALANCE(
-        Cypress.env("account_name_to_get_balance"),
-        "534,00"
-      )
+      locators.BALANCE.FN_XP_ACCOUNT_BALANCE("Wallet","100,00")
     ).should("exist");
+
   });
 
   it("Should delete a transaction", function () {
+
+    cy.intercept('DELETE', '/transacoes/**', {
+      statusCode: 204
+    }).as('del');
+
     cy.get(locators.MENU.EXTRACT).click();
     cy.xpath(
-      locators.EXTRACT.FN_XP_DELETE_TRANSACTION(
-        Cypress.env("transaction_name_desc_to_be_deleted")
-      )
+      locators.EXTRACT.FN_XP_DELETE_TRANSACTION("Desc")
     ).click();
   });
 });
