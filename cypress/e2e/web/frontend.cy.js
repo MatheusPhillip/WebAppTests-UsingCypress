@@ -271,7 +271,7 @@ describe("Should test using mocks", () => {
       });
   });
 
-  it.only('Should test colors', function () {
+  it('Should test colors', function () {
 
     cy.intercept('GET', '/extrato/**', {
       body:[
@@ -347,6 +347,24 @@ describe("Should test using mocks", () => {
     cy.xpath(locators.EXTRACT.FN_XP_GET_LINE('Receita pendente')).should('have.class', 'receitaPendente');
     cy.xpath(locators.EXTRACT.FN_XP_GET_LINE('Despesa paga')).should('have.class', 'despesaPaga');
     cy.xpath(locators.EXTRACT.FN_XP_GET_LINE('Despesa pendente')).should('have.class', 'despesaPendente');
+  })
+
+  it.only('Should test responsiveness', function () {
+    cy.get('[data-test=menu-home]').should('exist')
+      .and('be.visible')
+    
+    // Update resolution for a smartphone type using numbers
+    cy.viewport(500, 700)
+    
+    cy.get('[data-test=menu-home]').should('exist')
+      .and('not.be.visible')
+    
+    // Update resolution for a smartphone type using a type of phone
+
+    cy.viewport('iphone-5')
+    
+    cy.get('[data-test=menu-home]').should('exist')
+      .and('not.be.visible')
   })
 
 });
